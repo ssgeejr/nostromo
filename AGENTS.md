@@ -102,6 +102,15 @@ Never store credentials, tokens, private keys, database contents, logs, uploads,
 - Do not expose new services beyond the intended network scope without explicit direction.
 - Do not weaken authentication, disable security controls, or grant broad passwordless privilege merely to make an experiment easier.
 
+### Availability and power-state safety
+
+- Treat shutdown, reboot, suspend, hibernate, network disconnection, firewall-path removal, storage unmount, and stopping or disabling critical services as system-killing availability changes. Treat configuration or authorization changes that make those actions newly possible the same way, even if the configuration change itself appears harmless.
+- Never perform, authorize, expose, or make an availability-impacting action newly functional based only on implied intent, existing administrator or passwordless `sudo` rights, a failed authentication prompt, or an assumption that the change is easy to reverse. Require Steven's explicit approval of the exact availability effect and timing before proceeding.
+- Separate fixing a control or authentication problem from authorizing the underlying operation. A request to investigate or remove an error does not authorize shutdown, reboot, suspend, hibernate, disconnection, or another availability impact.
+- Before an approved availability-impacting change, verify a recovery path that does not depend on the affected system remaining online. Examples include tested Wake-on-LAN with the correct current MAC address, functioning out-of-band management, or confirmed physical access. If recovery cannot be verified, stop and ask Steven rather than assuming he is near the equipment.
+- Do not use a live shutdown, reboot, suspend, hibernate, network interruption, or critical-service stop as a validation test unless Steven explicitly approves that exact test. Prefer non-disruptive validation.
+- Account for the possibility that Steven is traveling or otherwise unable to reach the hardware. Never infer physical availability from responsiveness in chat.
+
 ## AI and Automation Testing
 
 - Local AI services and agent workflows may be installed, modified, benchmarked, and tested as directed.
