@@ -1,9 +1,0 @@
-// XRDP sessions are remote, so PolicyKit otherwise requests an administrator
-// password before allowing suspend. Permit only the pilot account to suspend
-// this system; other login1 power actions retain their default policy.
-polkit.addRule(function(action, subject) {
-    if (subject.user === "pilot" &&
-        action.id === "org.freedesktop.login1.suspend") {
-        return polkit.Result.YES;
-    }
-});
