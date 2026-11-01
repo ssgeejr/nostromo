@@ -28,23 +28,9 @@ Never display, copy, modify, commit, or expose the SSH private key. Do not place
 
 ## System Profile
 
-Last inspected: 2026-10-30
+[`SYSTEM.md`](SYSTEM.md) is the authoritative inventory for NOSTROMO's hardware, operating system, services, important configuration, and intentionally installed software. Update it after material system or software changes.
 
-- Hardware: HP Pro Mini 400 G9 Desktop PC
-- Architecture: x86-64, bare metal
-- Operating system: Debian GNU/Linux 13.7 (Trixie)
-- Kernel observed: Linux 6.12.113+deb13-amd64
-- Processor: 12th Gen Intel Core i5-12500T
-- CPU capacity: 6 physical cores / 12 logical CPUs, up to 4.4 GHz
-- CPU features relevant to local AI: AVX, AVX2, FMA, AVX-VNNI, and VT-x
-- Memory: 16 GB installed (approximately 15 GiB usable)
-- Swap: approximately 16 GB
-- Storage: 512 GB SK hynix PC801 NVMe SSD
-- Root filesystem: ext4, approximately 453 GiB usable filesystem capacity
-- Graphics: integrated Intel UHD Graphics 770 (Alder Lake-S GT1)
-- Discrete accelerator: none detected; do not assume NVIDIA CUDA or dedicated GPU memory
-
-Versions, free capacity, and the IP address are operational state and may change. Re-check them before upgrades, large downloads, model deployment, benchmarking, or capacity-sensitive work.
+Critical constraints: NOSTROMO is an x86-64 bare-metal system with 16 GB of memory, integrated Intel graphics, and no discrete accelerator. Do not assume NVIDIA CUDA or dedicated GPU memory. Versions, utilization, free capacity, and network addresses are operational state and must be re-checked before upgrades, large downloads, model deployment, benchmarking, or other capacity-sensitive work.
 
 ## Operating Expectations
 
