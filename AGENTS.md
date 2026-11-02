@@ -108,6 +108,14 @@ Never store credentials, tokens, private keys, database contents, logs, uploads,
 - Bind experimental services to the narrowest practical interface and require authentication when exposure warrants it.
 - Do not assume NOSTROMO or any installed AI service is approved for WMMC information, PHI, credentials, or other regulated data. Hospital use requires separate documented authorization.
 
+### External inference backend
+
+- Use GRAVITYDRIVE for heavy inference instead of attempting to run large models locally on NOSTROMO.
+- The canonical OpenAI-compatible base URL from NOSTROMO is `http://gravitydrive.local:8080/v1`; port `8081` is an optional secondary instance and must be checked before use.
+- Verify `/health` and `/v1/models` before relying on the backend. Treat the returned model identifier and capabilities as live state.
+- For Codex CLI installation, provider configuration, launch, and validation, follow [`CODEX_LLAMA_CPP.md`](CODEX_LLAMA_CPP.md).
+- Do not expose the inference service publicly or assume it is approved for hospital or regulated information.
+
 ## Verification and Reporting
 
 For completed work:
