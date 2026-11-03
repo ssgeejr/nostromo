@@ -79,7 +79,7 @@ Start the dedicated Qwen-backed Codex instance with:
 qwen
 ```
 
-The tracked launcher source is `scripts/qwen`, installed as `/usr/local/bin/qwen`. It starts in `/opt/apps/nostromo`, runs without the shared app-server daemon, selects the custom provider and model, and forwards additional arguments to Codex. Because the bundled Codex HTTP client does not resolve `.local` mDNS names reliably, the launcher resolves `gravitydrive.local` at startup and passes the current IPv4 address as a process-local provider override. The persistent configuration retains the hostname.
+The tracked launcher source is `scripts/qwen`, installed as `/usr/local/bin/qwen`. It starts in `/opt/apps/qwen`, runs without the shared app-server daemon, selects the custom provider and model, and forwards additional arguments to Codex. The launcher exits with a clear error if the Qwen project checkout does not exist. Because the bundled Codex HTTP client does not resolve `.local` mDNS names reliably, the launcher resolves `gravitydrive.local` at startup and passes the current IPv4 address as a process-local provider override. The persistent configuration retains the hostname.
 
 The custom provider makes `--oss` and `--local-provider ollama` unnecessary.
 

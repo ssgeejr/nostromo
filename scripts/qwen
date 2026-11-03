@@ -17,7 +17,13 @@ if [ -z "$gravitydrive_ipv4" ]; then
 fi
 gravitydrive_url="http://$gravitydrive_ipv4:8080/v1"
 
-cd /opt/apps/nostromo
+qwen_workspace=/opt/apps/qwen
+if [ ! -d "$qwen_workspace" ]; then
+    echo "qwen: workspace does not exist: $qwen_workspace" >&2
+    exit 72
+fi
+
+cd "$qwen_workspace"
 exec "$codex_executable" \
     --no-daemon \
     -c 'model_provider="gravitydrive"' \
