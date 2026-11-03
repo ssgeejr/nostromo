@@ -1,19 +1,37 @@
 # OpenAI Codex with Network llama.cpp
 
-This document defines the planned Codex CLI deployment on NOSTROMO using the Qwen model hosted by GRAVITYDRIVE. Codex will connect directly to llama.cpp's OpenAI-compatible Responses API; Ollama is not part of this design.
+This document defines the Codex CLI deployment on NOSTROMO using Qwen3.8 hosted by GRAVITYDRIVE. Codex connects directly to llama.cpp's OpenAI-compatible Responses API; Ollama is not part of this design.
 
 ## Current Status
 
-Verified from NOSTROMO on 2026-11-02:
+Verified across the local network on 2026-11-02:
 
-- `gravitydrive.local` resolves from NOSTROMO.
+- `gravitydrive.local` resolves and accepts connections on port `8080`.
 - `http://gravitydrive.local:8080/health` returns `{"status":"ok"}`.
-- `/v1/models` reports the model identifier `Qwen3.6-35B`.
-- A minimal request to `/v1/responses` returned HTTP 200.
-- Port `8081`, reserved for a secondary instance, did not respond.
+- `/v1/models` reports `Qwen3.8-27B`, GGUF format, 27.32B parameters, and a 262,144-token context per slot.
+- The server exposes two parallel slots with F16 KV caches.
+- The BF16 vision projector is loaded. The server reports text, image, and video input with text output.
+- The `/v1/responses` endpoint successfully completed a streamed text response.
+- Per-request thinking control successfully produced a direct, non-thinking response.
+- The `/v1/responses` endpoint produced a correctly formed streamed function call with valid JSON arguments.
+- A screenshot sent through `/v1/chat/completions` was read successfully, including accurate OCR of its visible text.
 - Codex CLI is not yet installed on NOSTROMO.
 
-Endpoint compatibility has therefore been established, but end-to-end Codex startup, streaming, tool calls, and file operations remain unverified.
+The model, network endpoint, Responses transport, tool-call generation, and multimodal pipeline are working. End-to-end Codex execution on NOSTROMO remains to be tested after Codex is installed.
+
+## What Qwen3.8 Can Do Now
+
+Qwen3.8 can currently:
+
+- Generate local text responses without using a cloud inference provider.
+- Stream Responses API output in the format expected by Codex.
+- Reason in thinking mode or accept a per-request non-thinking override.
+- Produce structured function calls with valid function names and JSON arguments.
+- Read screenshots and other images through the loaded vision projector.
+- Accept video input through the multimodal llama.cpp service.
+- Serve two concurrent 262,144-token contexts.
+
+The model does not control a computer merely because it can see and call functions. Codex or another trusted agent harness must provide and execute the actual shell, filesystem, browser, email, and desktop tools. Browser control, email access, Windows interaction, and autonomous Linux administration must each be tested after those tools are connected.
 
 ## 1. Verify the Backend
 
@@ -56,7 +74,7 @@ Start Codex from the target project directory and explicitly select the provider
 
 ```bash
 cd /opt/apps/nostromo
-codex -c model_provider=gravitydrive -m Qwen3.6-35B
+codex -c 'model_provider="gravitydrive"' -m Qwen3.8-27B
 ```
 
 The custom provider makes `--oss` and `--local-provider ollama` unnecessary.
@@ -66,7 +84,7 @@ The custom provider makes `--oss` and `--local-provider ollama` unnecessary.
 Use a harmless test request first. Confirm that Codex can:
 
 1. Start without OpenAI authentication.
-2. Receive a streamed response from `Qwen3.6-35B`.
+2. Receive a streamed response from `Qwen3.8-27B`.
 3. Read the repository instructions and list tracked files.
 4. Invoke a read-only shell tool.
 5. Complete without falling back to an OpenAI-hosted provider.
