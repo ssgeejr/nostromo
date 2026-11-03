@@ -2,7 +2,7 @@
 
 This file is the source of truth for NOSTROMO's hardware, operating system, important configuration, and intentionally installed software. Update it after material hardware, operating-system, service, or application changes.
 
-Last verified against the live server: **2026-11-01**
+Last verified against the live server: **2026-11-03**
 
 ## Hardware
 
@@ -64,6 +64,7 @@ Record software that was intentionally installed or materially configured for se
 | curl | 8.14.1-2+deb13u7 | HTTP and transfer diagnostics | Command-line tool |
 | wget | 1.25.0-2 | File retrieval | Command-line tool |
 | jq | 1.7.1-6+deb13u4 | JSON inspection for API and service diagnostics | Command-line tool |
+| Codex CLI (ChatGPT desktop bundle) | 0.166.0-alpha.5.1 | Agent harness for GRAVITYDRIVE-hosted Qwen3.8 | Bundled command-line tool |
 
 The live inspection found no installed Docker, Podman, libvirt, Cockpit, Node.js, or local-model serving runtime on 2026-11-01.
 
@@ -75,6 +76,8 @@ The live inspection found no installed Docker, Podman, libvirt, Cockpit, Node.js
 | Disable Intel Wi-Fi driver power saving | `config/modprobe.d/iwlwifi-no-powersave.conf` | `/etc/modprobe.d/iwlwifi-no-powersave.conf` |
 | Disable system sleep modes | `config/systemd/sleep.conf.d/10-never-sleep.conf` | `/etc/systemd/sleep.conf.d/10-never-sleep.conf` |
 | Ignore idle and sleep-trigger events | `config/systemd/logind.conf.d/10-never-sleep.conf` | `/etc/systemd/logind.conf.d/10-never-sleep.conf` |
+| GRAVITYDRIVE Codex provider | `CODEX_LLAMA_CPP.md` | `~/.codex/config.toml` |
+| Qwen-backed Codex launcher | `scripts/qwen` | `/usr/local/bin/qwen` |
 
 ## Software Change Record
 
@@ -82,6 +85,7 @@ When software is installed, upgraded outside normal security maintenance, replac
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Configured the credential-free GRAVITYDRIVE provider and installed the `qwen` launcher for an independent Qwen3.8-backed Codex instance. | Validated TOML, endpoint health, launcher syntax and permissions, provider/model selection, and an end-to-end exact-response inference test. |
 | 2026-11-02 | Documented the existing `jq` installation used for API verification. | Confirmed the installed Debian package and version on the live server. |
 | 2026-11-01 | Created the baseline hardware, operating-system, service, and software inventory. | Compared with the live server over SSH. |
 | 2026-10-30 | Disabled Wi-Fi power saving and all system sleep modes to preserve remote availability. | Confirmed driver power saving off, sleep capabilities unavailable, and SSH/XRDP healthy. |

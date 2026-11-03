@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+if command -v codex >/dev/null 2>&1; then
+    codex_executable=$(command -v codex)
+elif [ -x /usr/lib/chatgpt/resources/codex ]; then
+    codex_executable=/usr/lib/chatgpt/resources/codex
+else
+    echo "qwen: no usable Codex CLI executable was found" >&2
+    exit 127
+fi
+
+gravitydrive_ipv4=$(getent ahostsv4 gravitydrive.local | awk 'NR == 1 { print $1 }')
+if [ -z "$gravitydrive_ipv4" ]; then
+    echo "qwen: gravitydrive.local did not resolve to an IPv4 address" >&2
+    exit 69
+fi
+gravitydrive_url="http://$gravitydrive_ipv4:8080/v1"
+
+cd /opt/apps/nostromo
+exec "$codex_executable" \
+    --no-daemon \
+    -c 'model_provider="gravitydrive"' \
+    -c "model_providers.gravitydrive.base_url=\"$gravitydrive_url\"" \
+    -c 'model_context_window=262144' \
+    -m Qwen3.8-27B \
+    "$@"

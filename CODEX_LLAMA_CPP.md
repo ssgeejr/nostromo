@@ -4,7 +4,7 @@ This document defines the Codex CLI deployment on NOSTROMO using Qwen3.8 hosted 
 
 ## Current Status
 
-Verified across the local network on 2026-11-02:
+Verified across the local network on 2026-11-03:
 
 - `gravitydrive.local` resolves and accepts connections on port `8080`.
 - `http://gravitydrive.local:8080/health` returns `{"status":"ok"}`.
@@ -15,9 +15,13 @@ Verified across the local network on 2026-11-02:
 - Per-request thinking control successfully produced a direct, non-thinking response.
 - The `/v1/responses` endpoint produced a correctly formed streamed function call with valid JSON arguments.
 - A screenshot sent through `/v1/chat/completions` was read successfully, including accurate OCR of its visible text.
-- Codex CLI is not yet installed on NOSTROMO.
+- The ChatGPT desktop bundle provides Codex CLI `0.166.0-alpha.5.1` at `/usr/lib/chatgpt/resources/codex`.
+- The `gravitydrive` provider is configured in the `pilot` account's `~/.codex/config.toml` without credentials.
+- `/usr/local/bin/qwen` launches an independent Codex process with the GRAVITYDRIVE provider, `Qwen3.8-27B`, and the verified 262,144-token context window.
+- An end-to-end Codex inference test selected the GRAVITYDRIVE provider and returned the exact requested response.
+- llama.cpp's `/v1/models` response is not a Codex-native model catalog. Codex warns and uses fallback model metadata; the launcher supplies the verified context window explicitly.
 
-The model, network endpoint, Responses transport, tool-call generation, and multimodal pipeline are working. End-to-end Codex execution on NOSTROMO remains to be tested after Codex is installed.
+The model, network endpoint, Responses transport, tool-call generation, multimodal pipeline, and basic end-to-end Codex inference are working. Codex-driven shell and filesystem tool execution remains to be validated with harmless read-only tasks.
 
 ## What Qwen3.8 Can Do Now
 
@@ -40,22 +44,21 @@ curl -fsS http://gravitydrive.local:8080/health
 curl -fsS http://gravitydrive.local:8080/v1/models | jq
 ```
 
-Use the exact model identifier returned by `/v1/models`. Do not assume that the model or the secondary instance is running merely because the host responds.
+Use the exact model identifier returned by `/v1/models`. Do not assume that the model is running merely because the host responds.
 
-## 2. Install Codex CLI
+## 2. Verify Codex CLI
 
-Confirm the currently supported installation method before deployment. The planned official npm installation is:
+NOSTROMO currently uses the Codex CLI bundled with the ChatGPT desktop application:
 
 ```bash
-npm install -g @openai/codex@latest
-codex --version
+/usr/lib/chatgpt/resources/codex --version
 ```
 
-NOSTROMO did not have Node.js or npm installed at the last system inventory. Install only the required supported runtime, verify the resulting Codex version, and record both in `SYSTEM.md`.
+The launcher prefers a `codex` executable on `PATH` and falls back to the bundled executable. NOSTROMO does not require Node.js or npm for the current deployment. If a separate CLI is installed later, use the currently supported official installation method, validate its version, and update `SYSTEM.md`.
 
 ## 3. Configure the llama.cpp Provider
 
-Add this provider to `~/.codex/config.toml` for the `pilot` account:
+The `pilot` account's `~/.codex/config.toml` contains this provider:
 
 ```toml
 [model_providers.gravitydrive]
@@ -70,26 +73,27 @@ This configuration contains no credential. Keep any future token or secret out o
 
 ## 4. Launch Codex
 
-Start Codex from the target project directory and explicitly select the provider and model:
+Start the dedicated Qwen-backed Codex instance with:
 
 ```bash
-cd /opt/apps/nostromo
-codex -c 'model_provider="gravitydrive"' -m Qwen3.8-27B
+qwen
 ```
+
+The tracked launcher source is `scripts/qwen`, installed as `/usr/local/bin/qwen`. It starts in `/opt/apps/nostromo`, runs without the shared app-server daemon, selects the custom provider and model, and forwards additional arguments to Codex. Because the bundled Codex HTTP client does not resolve `.local` mDNS names reliably, the launcher resolves `gravitydrive.local` at startup and passes the current IPv4 address as a process-local provider override. The persistent configuration retains the hostname.
 
 The custom provider makes `--oss` and `--local-provider ollama` unnecessary.
 
 ## 5. End-to-End Validation
 
-Use a harmless test request first. Confirm that Codex can:
+Basic provider selection and inference have passed. Continue validation with harmless requests and confirm that Codex can:
 
-1. Start without OpenAI authentication.
-2. Receive a streamed response from `Qwen3.8-27B`.
-3. Read the repository instructions and list tracked files.
-4. Invoke a read-only shell tool.
-5. Complete without falling back to an OpenAI-hosted provider.
+1. Start without OpenAI authentication. **Verified 2026-11-03.**
+2. Receive a streamed response from `Qwen3.8-27B`. **Verified 2026-11-03.**
+3. Complete without falling back to an OpenAI-hosted provider. **Verified 2026-11-03.**
+4. Read the repository instructions and list tracked files.
+5. Invoke a read-only shell tool.
 
-Do not authorize system changes during the first validation. After successful testing, record the Codex version, provider, model, and verification date in `SYSTEM.md`.
+Do not authorize system changes during initial tool validation. Test records are stored outside the repository at `/opt/logs/nostromo/qwen3.8-test-case.log`.
 
 ## References
 
