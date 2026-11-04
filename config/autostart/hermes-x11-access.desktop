@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Hermes X11 Access
+Comment=Allow Hermes Computer Use processes owned by this user to access the XRDP X11 session
+Exec=/opt/var/hermes/bin/hermes-x11-access
+OnlyShowIn=KDE;
+X-KDE-autostart-after=panel
+X-KDE-StartupNotify=false
+Terminal=false

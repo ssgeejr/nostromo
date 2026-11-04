@@ -1,0 +1,8 @@
+#!/bin/sh
+set -eu
+
+if [ -z "${DISPLAY:-}" ]; then
+    exit 0
+fi
+
+exec /usr/bin/xhost "+SI:localuser:$(/usr/bin/id -un)"

@@ -2,12 +2,16 @@
 
 This document evaluates GUI agent systems that can connect to Qwen3.8-27B on GRAVITYDRIVE, control a web browser, and operate windowed Linux applications such as WordCraft, GridCraft, DeckCraft, LibreOffice, and other ArtCraft tools.
 
+## Current Selection
+
+**Hermes Desktop and Hermes Agent were selected and deployed.** They are the best fit for the actual goal: a persistent NOSTROMO operator with memory, skills, scheduling, automation, and native Linux Computer Use. Installation, configuration, paths, and validation results are maintained in [`HERMES.md`](HERMES.md).
+
 ## Candidate Summary
 
 | Rank | GUI agent | Browser | Native Linux applications | Assessment |
 | --- | --- | --- | --- | --- |
-| 1 | **Open Interpreter Desktop** | Yes | Built-in clicking, typing, menus, and dialogs | Best immediate desktop operator |
-| 2 | **Hermes Desktop** | Yes | Through `computer-use-linux` | Best permanent autonomous NOSTROMO agent |
+| 1 | **Hermes Desktop** | Yes | Built-in Computer Use through `cua-driver` | Selected permanent autonomous NOSTROMO agent |
+| 2 | **Open Interpreter Desktop** | Yes | Built-in clicking, typing, menus, and dialogs | Best short proof-of-concept alternative |
 | 3 | **Agent Zero** | Built-in visual browser | Full isolated Linux desktop | Best safe experimentation environment |
 | 4 | **Craft Agents** | Excellent built-in Chromium | Requires HCU or another computer-use MCP | Best Codex-like work interface |
 | 5 | **Pan-Agent Desktop** | Built-in Chromium | Native screenshots, OCR, mouse, keyboard, and window control | Promising lightweight alternative |
@@ -73,11 +77,11 @@ Hermes Desktop is the graphical interface for Hermes Agent, an open-source, pers
 - Can be accessed through messaging platforms in addition to the desktop GUI.
 - Supports local, Docker, SSH, and remote execution backends.
 - Can connect to custom OpenAI-compatible model endpoints.
-- Can use `computer-use-linux` for desktop application control.
+- Includes the Computer Use toolset backed by the pinned `cua-driver` runtime.
 
 ### Native computer control
 
-The `computer-use-linux` MCP server provides:
+Hermes's built-in Computer Use toolset communicates with `cua-driver` over local MCP and provides:
 
 - Linux accessibility-tree inspection through AT-SPI.
 - Screenshot capture.
@@ -90,7 +94,7 @@ This gives Hermes a path to operating ArtCraft applications, LibreOffice, file m
 
 ### Qwen and GRAVITYDRIVE fit
 
-Hermes supports custom OpenAI-compatible endpoints. The intended configuration will point Hermes at the llama.cpp service on GRAVITYDRIVE and select `Qwen3.8-27B`.
+Hermes is configured with the named custom provider `gravitydrive`, the llama.cpp endpoint `http://gravitydrive.local:8080/v1`, and model `Qwen3.8-27B`.
 
 Qwen has already demonstrated the core prerequisites:
 
@@ -101,7 +105,7 @@ Qwen has already demonstrated the core prerequisites:
 - Valid JSON tool arguments.
 - Correct streaming tool-call events.
 
-The complete Hermes-to-Qwen-to-desktop-control loop has not yet been tested.
+The complete Hermes-to-Qwen-to-desktop-control loop is working. Exact text inference, a structured terminal tool call, XRDP/X11 screenshot capture, and local screenshot interpretation have passed. Mouse, keyboard, document editing, and long-duration workflows remain to be tested.
 
 ### Strengths
 
@@ -114,7 +118,7 @@ The complete Hermes-to-Qwen-to-desktop-control loop has not yet been tested.
 ### Limitations and risks
 
 - More components and configuration than Open Interpreter.
-- Desktop operation depends on the separate `computer-use-linux` integration.
+- Linux Computer Use is alpha upstream and required a same-user X11 authorization helper under XRDP.
 - Persistent memory and self-created skills require review so incorrect procedures do not become reusable behavior.
 - Unattended workflows require carefully scoped permissions and approval policies.
 
@@ -290,8 +294,8 @@ Official project:
 
 ## Recommended Evaluation Order
 
-1. **Open Interpreter Desktop** — test direct control of Chromium and one harmless ArtCraft application.
-2. **Hermes Desktop** — test the complete persistent-agent workflow and `computer-use-linux` integration.
+1. **Hermes Desktop** — selected, installed, and validated through screenshot capture and interpretation.
+2. **Open Interpreter Desktop** — retain as a short-proof-of-concept alternative if Hermes cannot complete the remaining application-control tests.
 3. **Agent Zero** — evaluate isolated desktop operation, observation, and recoverability.
 4. **Craft Agents with HCU** — evaluate the Codex-like interface and MCP-based native application control.
 5. **Pan-Agent Desktop** — evaluate as a lightweight fallback or alternative.
@@ -329,15 +333,18 @@ The following capabilities have already been validated against the Qwen3.8-27B l
 - Streaming function-call events were correctly formed.
 - Image input worked through a vision test.
 - Screenshot text recognition was accurate.
+- Hermes selected the named GRAVITYDRIVE provider and completed exact text inference.
+- Hermes and Qwen completed a harmless structured terminal tool call.
+- Hermes Computer Use captured the active XRDP/X11 desktop and passed the screenshot to Qwen for local interpretation.
 
 The vision test did not perfectly identify the source application shown in the screenshot. Therefore, the transport and visual-reading path are working, but accurate semantic understanding of arbitrary desktop applications is not yet proven.
 
 ## Overall Recommendation
 
-- Use **Open Interpreter Desktop** for the first direct browser-and-application proof of concept.
-- Use **Hermes Desktop and Hermes Agent** as the leading candidate for the eventual persistent autonomous NOSTROMO operator.
+- Use **Hermes Desktop and Hermes Agent** as the deployed persistent NOSTROMO operator candidate.
+- Keep **Open Interpreter Desktop** as the first fallback for a short direct browser-and-application proof of concept.
 - Use **Agent Zero** when isolation and recoverability are more important than controlling the existing host desktop.
 - Use **Craft Agents with Microsoft HCU** when the preferred experience is a Codex-style project workspace.
 - Keep **Pan-Agent Desktop** as a lightweight native-control alternative.
 
-The final selection must be based on repeatable tests with Qwen3.8-27B. Successful vision and tool-call tests establish that Qwen has the necessary interfaces, but they do not by themselves prove reliable long-duration control of browsers and native Linux applications.
+Hermes is the selected system, but production acceptance still requires repeatable browser and native-application workflows, approval testing, interruption/takeover testing, and long-duration reliability testing with Qwen3.8-27B.
