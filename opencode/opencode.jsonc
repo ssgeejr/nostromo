@@ -1,0 +1,47 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "gravitydrive/Gufo_Qwen3.8_Flash-Next",
+  "providers": {
+    "gravitydrive": {
+      "name": "GRAVITYDRIVE Gufo",
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "http://gravitydrive.local:8080/v1"
+      },
+      "models": {
+        "Gufo_Qwen3.8_Flash-Next": {
+          "modelID": "Gufo_Qwen3.8_Flash-Next",
+          "name": "Gufo Qwen3.8 Flash-Next"
+        }
+      }
+    }
+  },
+  "mcp": {
+    "servers": {
+      "open-computer-use": {
+        "type": "local",
+        "command": [
+          "C:\\Users\\devops.HELIOS1\\AppData\\Local\\Microsoft\\WinGet\\Packages\\OpenJS.NodeJS.LTS_Microsoft.Winget.Source_8wekyb3d8bbwe\\node-v24.20.0-win-x64\\node_modules\\open-computer-use\\dist\\windows\\amd64\\open-computer-use.exe",
+          "mcp"
+        ]
+      },
+      "browse": {
+        "type": "local",
+        "command": [
+          "C:\\Users\\devops.HELIOS1\\AppData\\Local\\Microsoft\\WinGet\\Packages\\OpenJS.NodeJS.LTS_Microsoft.Winget.Source_8wekyb3d8bbwe\\node-v24.20.0-win-x64\\node.exe",
+          "C:\\Users\\devops.HELIOS1\\AppData\\Local\\Microsoft\\WinGet\\Packages\\OpenJS.NodeJS.LTS_Microsoft.Winget.Source_8wekyb3d8bbwe\\node-v24.20.0-win-x64\\node_modules\\@opencode\\browse\\dist\\cli.mjs",
+          "mcp"
+        ],
+        "environment": {
+          "OPENCODE_BROWSER_RUNTIME": "auto-update"
+        }
+      }
+    }
+  },
+  "plugins": [
+    "@opencode-ai/browser-control@0.8.4"
+  ],
+  "skills": [
+    "C:\\Users\\devops.HELIOS1\\.config\\opencode\\skills"
+  ]
+}

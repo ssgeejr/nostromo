@@ -136,3 +136,12 @@ For completed work:
 5. Report what changed, what was verified, and any remaining risk or follow-up.
 
 If required facts, access, authentication, or approval are unavailable, clearly identify the blocker and request only the minimum action needed from Steven.
+
+## OpenCode Disaster-Recovery Copies
+
+- The live OpenCode configuration and skills are outside this repository under the current user's `%USERPROFILE%\.config\opencode` directory. The repository's `opencode/` directory is a Git-trackable disaster-recovery copy only; OpenCode must not depend on it at runtime.
+- After changing the live OpenCode configuration or any live skill, run `scripts/backup-opencode.ps1` automatically. Do not ask Steven for separate permission to refresh the repository copy.
+- The backup script copies the live `opencode.jsonc` to `opencode/opencode.jsonc` and live skills to `opencode/skills`.
+- Keep `opencode/README.md` accurate about the live source paths and restore destinations.
+- Do not independently edit backed-up copies. Edit the live files first, test them, and then refresh the repository copy.
+- Never place credentials or secret values in the repository copy. OpenCode configuration must use environment references or another non-committed secret store if credentials are later required.

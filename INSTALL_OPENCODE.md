@@ -228,10 +228,12 @@ In OpenCode, use `/models` and confirm that `gravitydrive/Gufo_Qwen3.8_Flash-Nex
 ```powershell
 npm install --global open-computer-use
 open-computer-use doctor
-open-computer-use install-opencode-mcp
+opencode mcp add open-computer-use --global -- open-computer-use mcp
 ```
 
-The installer writes an OpenCode MCP entry to the active user configuration. Inspect the resulting OpenCode configuration and confirm that it preserved the GRAVITYDRIVE provider and all unrelated settings.
+On Windows with OpenCode 2, use OpenCode's own `mcp add` command shown above. As observed with `open-computer-use` 1.1.4, its `install-opencode-mcp` helper requires a POSIX shell and emits the older OpenCode 1 layout. The current OpenCode 2 layout nests the entry under `mcp.servers`. Inspect the resulting OpenCode configuration and confirm that it preserved the GRAVITYDRIVE provider and all unrelated settings.
+
+Run `opencode mcp list` and confirm that `open-computer-use` is connected. If OpenCode Desktop was already running when Node.js or the package was installed, restart Desktop so its background service receives the updated user `PATH`. If command resolution still fails, use the installed native Windows executable's absolute path in the server's `command` array and re-run the connection check.
 
 Useful direct diagnostics are:
 
@@ -374,6 +376,13 @@ Pass criteria:
 
 ## Updates and Recovery
 
+The live ADMIN01 OpenCode files are stored outside this repository:
+
+- Configuration: `%USERPROFILE%\.config\opencode\opencode.jsonc`
+- Skills: `%USERPROFILE%\.config\opencode\skills\`
+
+The Git-trackable disaster-recovery copies are `opencode/opencode.jsonc` and `opencode/skills/`. They are backups only and are not runtime sources. After changing the live configuration or a live skill, run `scripts/backup-opencode.ps1` from the repository root without requesting a separate confirmation. See [`opencode/README.md`](opencode/README.md) for complete restore instructions.
+
 Before updating any global package, record the working versions:
 
 ```powershell
@@ -402,25 +411,25 @@ Complete this section during the ADMIN01 installation.
 
 | Item | Recorded value |
 | --- | --- |
-| Installation date | Not installed |
-| Windows edition/build | Not recorded |
-| Architecture | Expected: x64 |
-| Installing Windows user | Not recorded |
-| Node.js version | Not installed |
-| npm version | Not installed |
-| OpenCode Desktop version | Not installed |
-| OpenCode CLI version | Not installed |
-| `open-computer-use` version | Not installed |
-| `@opencode/browse` version | Not installed |
-| Browser and extension version | Not installed |
-| GRAVITYDRIVE address resolved | Not tested from ADMIN01 |
-| `/health` result | Not tested from ADMIN01 |
-| Live model identifier | Expected: `Gufo_Qwen3.8_Flash-Next` |
-| Model acceptance test | Not run |
-| Windows application test | Not run |
-| Browser test | Not run |
-| Restart-persistence test | Not run |
-| Configuration backup location | Not recorded |
+| Installation date | 2026-11-12 |
+| Windows edition/build | Windows 11 Pro 10.0.26100 (build 26100) |
+| Architecture | x64 |
+| Installing Windows user | `HELIOS1\devops` |
+| Node.js version | 24.20.0 (shared user-scoped LTS) |
+| npm version | 11.19.0 |
+| OpenCode Desktop version | 2.2.7 |
+| OpenCode CLI version | 2.2.7 |
+| `open-computer-use` version | 1.1.4 |
+| `@opencode/browse` version | 0.0.16 |
+| Browser and extension version | Edge 157.0.4341.46; Chrome 157.0.8103.52; Browse 0.0.16 paired as `chrome-admin01`; Browser Control plugin 0.8.4 with extension manifest 0.0.25 loaded in Chrome |
+| GRAVITYDRIVE address resolved | `gravitydrive.local` resolved to `192.168.10.10`; TCP 8080 reachable |
+| `/health` result | `{"status":"ok"}` |
+| Live model identifier | `Gufo_Qwen3.8_Flash-Next`; `/v1/models` reported context length 131072 and text/image input modalities |
+| Model acceptance test | Passed: OpenCode returned exact phrase `ADMIN01-GUFO-READY-20261112` through GRAVITYDRIVE |
+| Windows application test | Not run; `open-computer-use doctor`, direct `list_apps`, and OpenCode MCP connection passed |
+| Browser test | Passed: Browse and Browser Control each opened `https://example.com/` and returned `Example Domain` through their Chrome extensions |
+| Restart-persistence test | Passed: Desktop restarted; Gufo configuration, Browse MCP, Open Computer Use MCP, and Browser Control plugin persisted; both configured MCP servers reconnected |
+| Configuration backup location | Live file: `%USERPROFILE%\.config\opencode\opencode.jsonc`; Git disaster-recovery copy: `opencode/opencode.jsonc`; historical local backups remain beside the live file |
 | Remaining issues | None recorded |
 
 After a successful installation, update this record with observed facts. If the change materially affects the NOSTROMO/GRAVITYDRIVE system inventory, update `SYSTEM.md` separately; do not describe planned ADMIN01 software as already installed on NOSTROMO.
