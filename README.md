@@ -13,4 +13,5 @@ Deployment documentation:
 
 - [`SYSTEM.md`](SYSTEM.md) — authoritative system and software inventory
 - [`CODEX_LLAMA_CPP.md`](CODEX_LLAMA_CPP.md) — Qwen-backed Codex deployment
-- [`HERMES.md`](HERMES.md) — Hermes Desktop, Computer Use, and GRAVITYDRIVE deployment
+- [`HERMES_DEPLOYMENT.md`](HERMES_DEPLOYMENT.md) — Hermes Desktop, Computer Use, and GRAVITYDRIVE deployment
+- [`GRAVITYDRIVE_BENCHMARKS.md`](GRAVITYDRIVE_BENCHMARKS.md) — dated local-inference performance checks

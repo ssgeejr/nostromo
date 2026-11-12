@@ -4,7 +4,7 @@ This document evaluates GUI agent systems that can connect to Qwen3.8-27B on GRA
 
 ## Current Selection
 
-**Hermes Desktop and Hermes Agent were selected and deployed.** They are the best fit for the actual goal: a persistent NOSTROMO operator with memory, skills, scheduling, automation, and native Linux Computer Use. Installation, configuration, paths, and validation results are maintained in [`HERMES.md`](HERMES.md).
+**Hermes Desktop and Hermes Agent were selected and deployed.** They are the best fit for the actual goal: a persistent NOSTROMO operator with memory, skills, scheduling, automation, and native Linux Computer Use. Installation, configuration, paths, and validation results are maintained in [`HERMES_DEPLOYMENT.md`](HERMES_DEPLOYMENT.md).
 
 ## Candidate Summary
 

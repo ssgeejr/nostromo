@@ -1,30 +1,30 @@
-# Hermes Desktop with GRAVITYDRIVE Qwen3.8
+# Hermes Desktop with GRAVITYDRIVE Local Inference
 
 This document defines the Hermes deployment on NOSTROMO. Hermes Agent and Hermes Desktop run on NOSTROMO, while inference is provided by the OpenAI-compatible llama.cpp service on GRAVITYDRIVE.
 
 ## Current Status
 
-Verified end to end on **2026-11-10**:
+Live state verified on **2026-11-12**:
 
 - Hermes Agent and Desktop: `0.23.1`, stable release `3b421578588243f920886e6fe79a6faa87ea026e`.
 - Hermes Computer Use: pinned `cua-driver` `0.21.0`; upstream labels Linux support alpha.
 - Inference endpoint: `http://gravitydrive.local:8080/v1`.
-- Model: `Qwen3.8-27B`.
-- Model format: GGUF `Q4_K_M`, 27,320,697,856 parameters.
-- Context: 262,144 tokens per llama.cpp slot; Hermes pins this value because its generic metadata fallback reports 131,072 for the unknown model identifier.
-- Modalities: text, image, and video input with text output.
+- Model advertised by `/v1/models`: `Gufo_Qwen3.8_Flash-Next`.
+- Advertised context length: 131,072 tokens.
+- Advertised input modalities: text and image.
 - Transport: OpenAI-compatible Chat Completions.
 - Authentication: none. No API key is stored or sent.
-- Thinking: enabled at `low` effort for the main agent to balance UI-planning quality against GRAVITYDRIVE's approximately 7-token/second generation rate. Routine vision, title, approval, and monitor tasks disable reasoning; compression uses `low`.
-- Main model and every configured auxiliary LLM task use GRAVITYDRIVE. No fallback provider is configured.
+- Direct no-reasoning benchmark: 256 output tokens at 100.93 tokens/second, 174.7 ms time to first token, and 2.783 seconds wall time. See [`GRAVITYDRIVE_BENCHMARKS.md`](GRAVITYDRIVE_BENCHMARKS.md).
+- Hermes resolves the main provider and all 19 auxiliary LLM routes to GRAVITYDRIVE. No fallback provider is configured.
 - Computer Use telemetry is disabled.
+- Hermes is configured for `Gufo_Qwen3.8_Flash-Next` with a 131,072-token context in both the main model block and the named GRAVITYDRIVE provider. A fresh Hermes one-shot completed successfully through the custom provider after alignment.
 
-The complete working path is:
+The intended path is:
 
 ```text
 Hermes Desktop / Hermes Agent on NOSTROMO
     -> Hermes tools and Computer Use on NOSTROMO
-    -> Qwen3.8-27B llama.cpp on GRAVITYDRIVE
+    -> Gufo_Qwen3.8_Flash-Next on GRAVITYDRIVE
 ```
 
 ## Installed Layout
@@ -43,6 +43,7 @@ Hermes Desktop / Hermes Agent on NOSTROMO
 | Pre-GRAVITYDRIVE configuration backup | `~/.hermes/backups/config.yaml.pre-gravitydrive-20261104` |
 | Pre-0.23.1 update backup | `~/.hermes/backups/pre-update-2026-11-10-132750.zip`, mode `0600` |
 | Pre-reasoning-profile backup | `~/.hermes/backups/config.yaml.pre-ui-reasoning-20261110-205807`, mode `0600` |
+| Pre-Gufo model-alignment backup | `~/.hermes/backups/config.yaml.pre-gufo-qwen38-flash-next-20261112`, mode `0600` |
 | X11 authorization helper | `/opt/var/hermes/bin/hermes-x11-access` |
 | KDE autostart entry | `~/.config/autostart/hermes-x11-access.desktop` |
 
@@ -55,10 +56,10 @@ The non-secret configuration in `~/.hermes/config.yaml` resolves to the followin
 ```yaml
 model:
   provider: custom:gravitydrive
-  default: Qwen3.8-27B
+  default: Gufo_Qwen3.8_Flash-Next
   base_url: http://gravitydrive.local:8080/v1
   api_mode: chat_completions
-  context_length: 262144
+  context_length: 131072
   supports_vision: true
 
 agent:
@@ -69,8 +70,8 @@ providers:
     name: GRAVITYDRIVE llama.cpp
     api: http://gravitydrive.local:8080/v1
     transport: chat_completions
-    default_model: Qwen3.8-27B
-    context_length: 262144
+    default_model: Gufo_Qwen3.8_Flash-Next
+    context_length: 131072
     discover_models: true
 
 auxiliary:
@@ -112,6 +113,19 @@ The following auxiliary tasks are pinned explicitly to `provider: custom:gravity
 
 Automatic title-model upgrading is disabled. This prevents title generation from selecting a different provider.
 
+## Live Tool Verification
+
+Hermes Doctor on 2026-11-12 confirmed the Python environment, SQLite stores, TLS trust, required packages, configuration schema, provider routing, Git, ripgrep, Node.js, Chromium, and dashboard imports. The following primary tool families registered as available:
+
+- Browser and browser-use
+- Web search and extraction through the configured provider
+- Terminal, file operations, and code execution
+- Computer Use, desktop UI, and vision
+- Projects, skills, memory, session search, and todo management
+- Delegation, cron, kanban, connections, connectors, catalog, TTS, and video
+
+Optional integrations without their required dependency or credential remain unavailable. `hermes pm doctor` also reported that the managed Python bytes do not match its recorded package-manager digest, although Hermes Doctor successfully launched and validated Python 3.14.9 and the active runtime environment. Computer Use validation from a headless SSH shell reports no display because that shell has no X11 or Wayland session; desktop-session validation must be performed from the active KDE session.
+
 ## Starting Hermes Desktop
 
 From the active KDE/XRDP desktop, open the application launcher and select **Hermes**, or run:
@@ -146,6 +160,8 @@ Installed copies:
 The authorization is scoped to the current X server and is recreated for each KDE/XRDP login.
 
 ## Verification
+
+On 2026-11-12, the main model block and named GRAVITYDRIVE provider were aligned with live discovery: `Gufo_Qwen3.8_Flash-Next` and 131,072 tokens. `hermes config check` passed, all four values read back correctly, and a fresh no-reasoning Hermes one-shot returned the exact response `HERMES_MODEL_ALIGNMENT_OK` in one API call. The request used the `custom` provider, reported the correct model identifier, and completed in 7.127 seconds including Hermes startup and 16,188 project-context input tokens. The restricted pre-change configuration backup is listed under Installed Layout, and the usage record is stored at `/opt/logs/hermes/2026-11-12-gufo-model-alignment-usage.json` with mode `0600`.
 
 Check the backend before relying on it:
 
@@ -194,11 +210,10 @@ Test usage records are stored in `/opt/logs/hermes` and are not committed.
 
 - Computer Use on Linux is alpha upstream.
 - Screenshot capture and interpretation are verified. Mouse, keyboard, scrolling, dragging, saving files, and multi-application workflows have not yet been exercised through Hermes.
-- GRAVITYDRIVE currently exposes one 262,144-token inference slot. Long screenshot descriptions or another concurrent request can occupy the slot and exceed a short interactive timeout.
+- The live backend advertises a 131,072-token context. The 2026-11-12 benchmark reported logical concurrency 2 with physical execution width 1 and a serial-fallback execution plan.
 - The XRDP desktop must be logged in and unlocked for Hermes to control that session.
 - Hermes web search, hosted connectors, image generation, TTS, and other Internet-backed tools remain available for configuration independently of the GRAVITYDRIVE model.
 - `hermes doctor` validates the custom provider and all 19 auxiliary routes. It exits nonzero when optional integrations or system dependencies are absent; these warnings do not affect the configured GRAVITYDRIVE path. The current upstream lockfiles report one moderate advisory in the root npm tree and one in the web tree, with none in the UI/TUI tree.
-- NOSTROMO and GRAVITYDRIVE are not approved for PHI during experimentation. Production use requires separate documented authorization and the necessary administrative, physical, and technical controls.
 
 ## Inference and Internet Connectivity
 
@@ -213,11 +228,11 @@ Internet access is an available system capability. External providers and tools,
 
 ## Preferred Model
 
-Use `Qwen3.8-27B` on GRAVITYDRIVE as the preferred model whenever it is capable of completing the task effectively. Hermes may use Internet-backed tools, services, APIs, or external models when they provide information or capabilities that Qwen3.8 does not have or when they are the better choice for the task.
+Use the live model advertised by GRAVITYDRIVE, currently `Gufo_Qwen3.8_Flash-Next`, as the preferred model whenever it is capable of completing the task effectively. Hermes may use Internet-backed tools, services, APIs, or external models when they provide information or capabilities that the local model does not have or when they are the better choice for the task.
 
 ## Grok's Role
 
-- `Qwen3.8-27B` remains Hermes' preferred primary model.
+- The model currently advertised by GRAVITYDRIVE remains Hermes' preferred primary model.
 - Grok provides research, current information, clarification, and second opinions when those capabilities improve the result.
 - Grok is invoked explicitly by the user or through a defined Hermes capability.
 - Grok is not an automatic fallback for failed Qwen inference.

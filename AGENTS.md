@@ -2,7 +2,7 @@
 
 ## Project Purpose
 
-This repository is the working project for managing, updating, modifying, and testing the standalone Linux server **NOSTROMO**.
+This repository is the working project for managing, updating, modifying, and testing the standalone Linux server **NOSTROMO**. The broader proof of concept is to determine whether a Linux workstation, local inference, and agent-driven tools can replace the Windows-based workflow while supporting the long-term security, privacy, and compliance objectives required for hospital work.
 
 NOSTROMO is an intentionally experimental AI playground used for:
 
@@ -13,6 +13,15 @@ NOSTROMO is an intentionally experimental AI playground used for:
 - Development, infrastructure, and integration testing
 
 Experimental does not mean disposable. Preserve working configurations, user data, model files, and recoverability unless the task explicitly requires otherwise.
+
+## Mandatory Proof-of-Concept Posture
+
+- Compliance is a design objective and validation workstream for this project, not a prerequisite for experimentation, prototyping, construction, or capability testing.
+- Do not interrupt routine work with generic reminders that NOSTROMO, Hermes, a model, or a workflow is not yet compliant, approved, or production-ready. Do not repeat compliance boilerplate, lecture Steven about familiar HIPAA, PHI, PII, or Joint Commission concepts, or treat the project's unfinished compliance work as an automatic blocker.
+- Continue executing requested in-scope proof-of-concept work unless the specific action would create a concrete and immediate material risk, such as sending actual regulated data to an unauthorized external service. A theoretical future compliance gap is not, by itself, a reason to stop exploratory work.
+- When a specific material concern must be raised, identify the exact action, data flow, or missing control once, state it concisely, provide the most practical safe path forward, and continue all unaffected work.
+- Online research, website interaction, data extraction, ticketing integrations, remote access, local models, external tools, and GUI automation are expected areas of experimentation. Evaluate their real behavior and boundaries through testing rather than rejecting them categorically.
+- Do not claim that NOSTROMO or a workflow has achieved compliance, authorization, or production approval unless the supporting evidence and decision exist. This accuracy requirement must not be turned into repetitive warnings during ordinary development work.
 
 ## System Access
 
