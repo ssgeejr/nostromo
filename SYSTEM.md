@@ -2,7 +2,7 @@
 
 This file is the source of truth for NOSTROMO's hardware, operating system, important configuration, and intentionally installed software. Update it after material hardware, operating-system, service, or application changes.
 
-Last verified against the live server: **2026-11-04**
+Last verified against the live server: **2026-11-10**
 
 ## Hardware
 
@@ -26,7 +26,7 @@ Last verified against the live server: **2026-11-04**
 | Item | Current state |
 | --- | --- |
 | Distribution | Debian GNU/Linux 13 (Trixie); Debian version 13.7 last observed |
-| Kernel | Linux 6.12.113+deb13-amd64 |
+| Kernel | Linux 6.12.115+deb13.1-amd64 running; Debian security kernel 6.12.116+deb13-amd64 installed for the next boot |
 | Hostname | `nostromo.local` |
 | Desktop | KDE Plasma 6.3.6 using XRDP/Xorg for remote sessions |
 | Root filesystem | ext4, 453 GiB filesystem capacity |
@@ -44,6 +44,8 @@ Addresses, utilization, free capacity, package revisions, and kernel versions ar
 | Remote desktop | XRDP and xrdp-sesman enabled and active |
 | Wi-Fi power saving | Disabled globally in NetworkManager |
 | Intel Wi-Fi driver power saving | Disabled for `iwlwifi` and `iwlmvm` |
+| Wi-Fi PCI runtime power management | Forced on; runtime suspend forbidden |
+| Wi-Fi idle-path keepalive | Gateway probe every 20 seconds through a systemd timer |
 | System sleep | Suspend, hibernate, hybrid sleep, and suspend-then-hibernate disabled and masked |
 
 Do not record Wi-Fi credentials, private keys, tokens, or other secrets in this file or repository.
@@ -59,6 +61,7 @@ Record software that was intentionally installed or materially configured for se
 | XRDP | 0.10.1-3.1+deb13u2 | Remote desktop service | Enabled and active |
 | xorgxrdp | 0.10.2-1 | Xorg backend for XRDP | Used by XRDP sessions |
 | KDE Plasma Desktop | 6.3.6 | Graphical desktop environment | Available through XRDP |
+| Deskflow | 1.27.0 | TLS-capable keyboard and mouse sharing | Installed from the verified upstream Debian 13 package; not yet configured or running |
 | Git | 2.47.3 | Source control | Command-line tool |
 | Python | 3.13.5 | Scripting and automation | Command-line runtime |
 | curl | 8.14.1-2+deb13u7 | HTTP and transfer diagnostics | Command-line tool |
@@ -66,7 +69,7 @@ Record software that was intentionally installed or materially configured for se
 | jq | 1.7.1-6+deb13u4 | JSON inspection for API and service diagnostics | Command-line tool |
 | Codex CLI (ChatGPT desktop bundle) | 0.166.0-alpha.5.1 | Agent harness for GRAVITYDRIVE-hosted Qwen3.8 | Bundled command-line tool |
 | Debian build-essential | 12.12 | Native build toolchain required to package Hermes Desktop | Command-line toolchain |
-| Hermes Agent and Hermes Desktop | 0.22.7 | Persistent AI agent runtime and graphical desktop interface | Installed for `pilot` under `/opt/var/hermes`; not running as a service |
+| Hermes Agent and Hermes Desktop | 0.23.1 | Persistent AI agent runtime and graphical desktop interface | Installed for `pilot` under `/opt/var/hermes`; gateway starts on demand and is not installed as a service |
 | Hermes Computer Use (`cua-driver`) | 0.21.0 | On-demand AT-SPI, X11 input, and screen-capture control for Hermes | Toolset enabled; driver starts on demand; upstream Linux support is alpha |
 
 The live inspection found no installed Docker, Podman, libvirt, Cockpit, Node.js, or local-model serving runtime on 2026-11-01.
@@ -79,8 +82,11 @@ Hermes manages its own pinned Python, Node.js, Chromium, FFmpeg, ripgrep, npm, a
 | --- | --- | --- |
 | Disable NetworkManager Wi-Fi power saving | `config/NetworkManager/wifi-powersave-off.conf` | `/etc/NetworkManager/conf.d/wifi-powersave-off.conf` |
 | Disable Intel Wi-Fi driver power saving | `config/modprobe.d/iwlwifi-no-powersave.conf` | `/etc/modprobe.d/iwlwifi-no-powersave.conf` |
+| Keep Intel Wi-Fi PCI function awake | `config/udev/rules.d/80-nostromo-wifi-runtime-pm.rules` | `/etc/udev/rules.d/80-nostromo-wifi-runtime-pm.rules` |
+| Maintain idle Wi-Fi forwarding path | `scripts/nostromo-network-keepalive`, `config/systemd/system/nostromo-network-keepalive.{service,timer}` | `/usr/local/sbin/nostromo-network-keepalive`, `/etc/systemd/system/nostromo-network-keepalive.{service,timer}` |
 | Disable system sleep modes | `config/systemd/sleep.conf.d/10-never-sleep.conf` | `/etc/systemd/sleep.conf.d/10-never-sleep.conf` |
 | Ignore idle and sleep-trigger events | `config/systemd/logind.conf.d/10-never-sleep.conf` | `/etc/systemd/logind.conf.d/10-never-sleep.conf` |
+| KDE idle and appearance policy | Documented in `SYSTEM.md`; backup under `/opt/prj/nostromo/config-backups/2026-11-10-kde-idle-dark` | `~/.config/kscreenlockerrc`, `~/.config/powerdevilrc`, and `~/.config/kdeglobals` |
 | GRAVITYDRIVE Codex provider | `CODEX_LLAMA_CPP.md` | `~/.codex/config.toml` |
 | Qwen-backed Codex launcher | `scripts/qwen` | `/usr/local/bin/qwen` |
 | GRAVITYDRIVE Hermes provider and auxiliary routing | `HERMES.md` | `~/.hermes/config.yaml` |
@@ -93,6 +99,11 @@ When software is installed, upgraded outside normal security maintenance, replac
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-10 | Repaired conflicting Hermes reasoning controls for the GRAVITYDRIVE-backed Qwen model. Removed the provider-level hard thinking disable, set the main agent to `low` reasoning for approximately 7-token/second interactive operation, and set latency-sensitive auxiliary tasks to `none` or `low`. Preserved the prior configuration at `~/.hermes/backups/config.yaml.pre-ui-reasoning-20261110-205807`. Restarted Hermes Desktop and its on-demand gateway in the active KDE session. Rebound the affected existing chat through Hermes' supported session-level reasoning and model controls so its frozen policy also uses the repaired provider settings. | `hermes config check` passed; the old gateway exited cleanly; the Desktop transient unit and fresh localhost gateway were healthy; a new-session request returned `HERMES_REASONING_OK`; and the repaired 42,400-token existing chat returned `EXISTING_CHAT_OK` in 105.6 seconds without the former HTTP 400 `invalid_reasoning` error. |
+| 2026-11-10 | Updated Hermes Agent and Desktop from stable `0.22.7` to stable `0.23.1` at commit `3b421578588243f920886e6fe79a6faa87ea026e`. Rebuilt the Desktop and migrated the Hermes configuration schema from version 52 to 53. Preserved a restricted, integrity-tested rollback archive at `~/.hermes/backups/pre-update-2026-11-10-132750.zip`. | Verified the exact clean Git release, configuration validity, GRAVITYDRIVE health and model discovery, all 19 auxiliary routes, exact `HERMES_UPDATE_OK` inference, Computer Use input and capture checks in the active KDE Wayland session through XWayland, managed dependency health, Desktop shared libraries, and absence of a residual Hermes listener after testing. |
+| 2026-11-10 | Configured KDE to dim the display after 10 minutes of inactivity without turning it off or locking it, automatically lock after 60 minutes, retain disabled automatic suspend, and use the Breeze Dark global theme and color scheme. Applied the same power profile policy to AC, battery, and low-battery profiles. | Read back every stored setting, reloaded PowerDevil through its live D-Bus interface, confirmed the active AC profile, verified `DimDisplay` and brightness control support, and confirmed Breeze Dark is active in the current Wayland Plasma session. |
+| 2026-11-10 | Installed Deskflow 1.27.0 from the official upstream Debian Trixie x86-64 package. No client/server role, autostart, listener, or firewall change was configured. Removed the downloaded installer, its staging directories, and the default settings file created by version validation. | Matched the upstream SHA-256 before installation; verified package integrity, dependency health, resolved shared libraries, versions of both binaries, and the KDE desktop entry. |
+| 2026-11-10 | Hardened remote network availability after an inbound RDP attempt required traffic to wake the Wi-Fi path. Added a 20-second gateway keepalive and a persistent udev rule forbidding PCI runtime suspend for the Intel AX211. Booted and verified Debian kernel 6.12.115, then installed security kernel 6.12.116 after refreshing Debian's package metadata; 6.12.116 will activate on the next approved reboot. | Confirmed NetworkManager and the active connection both disable Wi-Fi power save, `iwlwifi` power saving is off, `iwlmvm` is in active mode, PCI runtime suspend is forbidden, all system sleep targets remain masked, SSH/XRDP are listening, 35 consecutive post-reboot keepalives succeeded, package integrity passed, and no kernel crash, firmware restart, filesystem error, or failed service occurred on the 6.12.115 boot. |
 | 2026-11-04 | Configured the named Hermes provider `gravitydrive` for credential-free `Qwen3.8-27B` inference at `http://gravitydrive.local:8080/v1`. Pinned the verified 262,144-token context, disabled Qwen thinking, enabled native vision metadata, routed all current auxiliary LLM tasks explicitly to `custom:gravitydrive`, and retained an empty fallback chain. Installed a same-user KDE/X11 authorization helper required by `cua-driver` under XRDP. | Verified live backend health and model metadata, exact text inference, structured terminal tool execution, Computer Use screenshot capture, local vision processing, configuration validity, and successful `CAPTURE_OK` completion without mouse or keyboard input. |
 | 2026-11-03 | Installed and enabled the pinned Hermes Computer Use driver v0.21.0. Kept telemetry disabled and cleared the temporary package opt-out from the staged Step 1 installation. | `hermes computer-use doctor` passed the binary, platform, MCP session, AT-SPI/X11 input, and screen-capture checks against the active XRDP/X11 desktop. |
 | 2026-11-03 | Installed Hermes Agent v0.22.7 and built Hermes Desktop for `pilot`, with the replaceable checkout under `/opt/var/hermes` and user state under `~/.hermes`. Computer Use was explicitly excluded for the separate second deployment step, and GRAVITYDRIVE was not configured. | Verified the Hermes CLI release and policy-compliant install path, exact Git release tag, packaged Desktop executable and application launcher, managed dependency health, resolved shared libraries, absence of `cua-driver`, and no running Hermes process. |

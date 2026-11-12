@@ -1,0 +1,12 @@
+[Unit]
+Description=Keep NOSTROMO's Wi-Fi path active
+After=NetworkManager.service
+Wants=NetworkManager.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nostromo-network-keepalive
+TimeoutStartSec=5s
+
+[Install]
+WantedBy=multi-user.target

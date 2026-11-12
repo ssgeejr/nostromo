@@ -1,0 +1,12 @@
+[Unit]
+Description=Run NOSTROMO network keepalive every 20 seconds
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=20s
+AccuracySec=1s
+RandomizedDelaySec=0
+Unit=nostromo-network-keepalive.service
+
+[Install]
+WantedBy=timers.target

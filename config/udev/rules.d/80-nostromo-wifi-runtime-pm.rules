@@ -1,0 +1,3 @@
+# The Intel AX201 is NOSTROMO's only active network path. Keep PCI runtime
+# suspend forbidden even if a power-profile component changes the default.
+ACTION=="add|bind|change", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x7af0", ATTR{power/control}="on"

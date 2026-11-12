@@ -1,0 +1,34 @@
+#!/bin/sh
+# Keep NOSTROMO's Wi-Fi path active so idle AP/client state cannot block the
+# first inbound SSH or RDP connection. NetworkManager remains responsible for
+# association and recovery; this probe never resets or reconnects the NIC.
+
+set -eu
+
+interface=$(
+    nmcli -t -f DEVICE,TYPE,STATE device status |
+        awk -F: '$2 == "wifi" && $3 == "connected" { print $1; exit }'
+)
+
+if [ -z "${interface}" ]; then
+    logger -p daemon.warning -t nostromo-network-keepalive \
+        "No connected Wi-Fi interface is available"
+    exit 1
+fi
+
+gateway=$(
+    ip -4 route show default dev "${interface}" |
+        awk '$1 == "default" && $2 == "via" { print $3; exit }'
+)
+
+if [ -z "${gateway}" ]; then
+    logger -p daemon.warning -t nostromo-network-keepalive \
+        "No IPv4 gateway is available on ${interface}"
+    exit 1
+fi
+
+if ! ping -n -q -I "${interface}" -c 1 -W 2 "${gateway}" >/dev/null 2>&1; then
+    logger -p daemon.warning -t nostromo-network-keepalive \
+        "Gateway ${gateway} did not answer on ${interface}"
+    exit 1
+fi

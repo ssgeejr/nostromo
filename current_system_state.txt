@@ -1,0 +1,33 @@
+Current stats:
+- System: HP Pro Mini 400 G9, bare metal
+- OS: Debian 13 (Trixie), kernel 6.12.115+deb13.1-amd64
+- CPU: Intel Core i5-12500T
+  - 6 physical cores / 12 threads
+  - 800 MHz–4.4 GHz
+  - 18 MiB L3 cache
+- Memory: 15 GiB usable
+  - 7.7 GiB used
+  - 7.6 GiB available
+  - 1.1 GiB completely free
+- Swap: 15 GiB total, only 47 MiB used
+- Graphics: Intel UHD Graphics 770 integrated GPU
+- Storage: 512 GB SK hynix NVMe
+  - 453 GiB filesystem
+  - 27 GiB used
+  - 403 GiB available
+  - 7% utilized
+- Current load: 0.19 / 0.09 / 0.07 — practically idle
+- Uptime: 1 day, 10 hours
+- Network: Wi-Fi active at 192.168.1.121; Ethernet currently down
+- Architecture: x86-64 with AVX2, AVX-VNNI, AES and Intel VT-x support
+In practical terms: NOSTROMO is a healthy 6-core/12-thread mini PC with 16 GB RAM, fast NVMe storage, plenty of free disk space, and integrated graphics—but no discrete AI accelerator.
+
+
+GRAVITYDRIVE is currently running:
+- Actual model: Qwen3.8-Flash-Next
+- Quantization: UD-Q4_K_XL
+- API alias: Qwen3.8-27B
+- Context window: 131,072 tokens
+- Capabilities: text and image input
+- Inference slots: 2
+- Server build: 0.33.0
